@@ -23,6 +23,9 @@ result-*
 # direnv
 .direnv/
 
+# npm global packages (installed by flake.nix)
+.npm-global/
+
 # IDE
 .idea/
 .vscode/

@@ -117,3 +117,25 @@ info:
 disk-usage:
     @echo "=== Model Cache Size ==="
     @du -sh ~/.cache/huggingface/hub/models--black-forest-labs* 2>/dev/null || echo "No models cached yet"
+
+# ====================
+# Browser Automation
+# ====================
+
+# Get Playwright Chromium executable path
+chromium-path:
+    @ls ~/.cache/ms-playwright/chromium-*/chrome-linux/chrome 2>/dev/null | head -1 || \
+        echo "$PLAYWRIGHT_BROWSERS_PATH/chromium-*/chrome-linux/chrome" | head -1
+
+# ====================
+# Devenv Commands
+# ====================
+
+# Run create-devenv CLI
+create-devenv:
+    npx @tktco/create-devenv@latest
+
+# Reinstall npm global packages
+reinstall-npm:
+    rm -f .npm-global/.installed
+    @echo "Run 'nix develop' or 'direnv reload' to reinstall npm packages"

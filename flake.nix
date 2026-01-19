@@ -14,8 +14,9 @@
           config.allowUnfree = true;
         };
 
-        # Python 3.12 for Flux2 compatibility
+        # Tool versions
         python = pkgs.python312;
+        nodejs = pkgs.nodejs_22;
 
       in
       {
@@ -23,22 +24,31 @@
           name = "flux2-dev";
 
           packages = with pkgs; [
-            # Python
+            # === Python ===
             python
             uv
 
-            # Build dependencies (needed for some Python packages)
+            # === Node.js ===
+            nodejs
+            pnpm
+            nodePackages.npm
+
+            # === Build dependencies ===
             stdenv.cc.cc.lib
             zlib
             libffi
             openssl
 
-            # Useful tools
+            # === Dev tools ===
             just
             direnv
             git
+            jq
 
-            # For image viewing (optional)
+            # === Browser automation ===
+            playwright-driver.browsers
+
+            # === Image viewing (optional) ===
             feh
           ];
 
@@ -46,29 +56,58 @@
             echo "Flux2 Development Environment"
             echo "=============================="
             echo ""
-            echo "Python: $(python --version)"
-            echo "uv: $(uv --version)"
+            echo "Tools:"
+            echo "  Python: $(python --version)"
+            echo "  Node:   $(node --version)"
+            echo "  uv:     $(uv --version)"
+            echo "  pnpm:   $(pnpm --version)"
             echo ""
+
+            # === Environment Variables ===
+            # MPS fallback for PyTorch on macOS
+            export PYTORCH_ENABLE_MPS_FALLBACK=1
+
+            # uv uses the correct Python
+            export UV_PYTHON=${python}/bin/python
+
+            # Playwright browsers
+            export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+
+            # === npm global packages ===
+            # Install npm packages to local directory
+            export NPM_CONFIG_PREFIX="$PWD/.npm-global"
+            export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+            mkdir -p "$NPM_CONFIG_PREFIX"
+
+            # Install global npm packages if not present
+            if [ ! -f "$NPM_CONFIG_PREFIX/.installed" ]; then
+              echo "Installing npm packages..."
+              npm install -g \
+                @anthropic-ai/claude-code \
+                @openai/codex \
+                @google/gemini-cli \
+                @antfu/ni \
+                playwright \
+                2>/dev/null || true
+              touch "$NPM_CONFIG_PREFIX/.installed"
+              echo ""
+            fi
+
+            # === Python venv ===
+            if [ -d ".venv" ]; then
+              export VIRTUAL_ENV="$PWD/.venv"
+              export PATH="$VIRTUAL_ENV/bin:$PATH"
+            fi
+
             echo "Commands:"
             echo "  just setup    - Install Python dependencies"
             echo "  just generate - Generate an image"
             echo "  just help     - Show all commands"
             echo ""
-
-            # Set up environment variables for MPS on macOS
-            export PYTORCH_ENABLE_MPS_FALLBACK=1
-
-            # Ensure uv uses the correct Python
-            export UV_PYTHON=${python}/bin/python
-
-            # Add .venv to PATH if it exists
-            if [ -d ".venv" ]; then
-              export VIRTUAL_ENV="$PWD/.venv"
-              export PATH="$VIRTUAL_ENV/bin:$PATH"
-            fi
           '';
 
-          # Required for PyTorch on macOS
+          # Library paths for native dependencies
           env = {
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
               pkgs.stdenv.cc.cc.lib
