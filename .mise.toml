@@ -1,7 +1,7 @@
 [tools]
 node = ["22", "24"]
 uv = "latest"
-python = "3.14"
+python = "3.12"
 pnpm = "10"
 
 "npm:@anthropic-ai/claude-code" = "latest"

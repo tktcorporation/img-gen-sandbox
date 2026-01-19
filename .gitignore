@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+*.egg-info/
+*.egg
+dist/
+build/
+
+# uv
+.uv/
+uv.lock
+
+# Nix
+result
+result-*
+
+# direnv
+.direnv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Generated images
+output.png
+output*.png
+generated/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hugging Face cache (optional - uncomment to ignore)
+# ~/.cache/huggingface/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# mypy / ruff
+.mypy_cache/
+.ruff_cache/
